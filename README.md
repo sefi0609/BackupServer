@@ -30,4 +30,4 @@ For every session the server will generate a new key, The rest is as described a
 
 > file is already on the server 
 ### client
-![error_full_flow_clinet](https://user-images.githubusercontent.com/81361291/225738460-0b06a9b7-0c67-4e4c-88cf-a64ae4156e80.PNG)
+![error_full_flow_clinet](https://user-images.githubusercontent.com/81361291/225739226-58af1087-db42-4084-9306-e114da84f601.PNG)
