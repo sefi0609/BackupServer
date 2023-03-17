@@ -1,7 +1,7 @@
 # Project Overview
 Hello and welcome to my BackupServer project.  
 This is a Multi-threaded client server application.  
-In this project I have worked with: Crypto libraries, DataBase - Sqlite3, Sockets, Files, Binary Files  
+In this project I have worked with: Crypto libraries, DataBase - Sqlite3, Sockets, Files, Binary Files, threads     
 and checkSum calculation as per Linux with a littel twist.  
 If the client is not registered to the service, then he will first register,  
 Then he will generate an RSA key pair and send the public key to the server.  
