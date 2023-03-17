@@ -1,6 +1,6 @@
-# Introduction
+# Project Overview
 Hello and welcome to my BackupServer project.  
-This is a client server application.  
+This is a Multi-threaded client server application.  
 In this project I have worked with: Crypto libraries, DataBase - Sqlite3, Sockets, Files, Binary Files  
 and checkSum calculation as per Linux with a littel twist.  
 If the client is not registered to the service, then he will first register,  
