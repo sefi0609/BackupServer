@@ -5,7 +5,7 @@ import os
 # if the path doesn't exist - create this path
 def write_file(client_name, file_name, file_content):
     if not os.path.isdir(f'files/{client_name}'):
-        os.mkdir(f'files/{client_name}')
+        os.makedirs(f'files/{client_name}')
     with open(f'files/{client_name}/{file_name}', 'wb') as file:
         file.write(file_content)
 
