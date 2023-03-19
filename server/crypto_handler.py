@@ -20,7 +20,7 @@ class CryptoHandler:
             # 16 bytes == 128 bit
             self._aes_key = get_random_bytes(self._aes_size)
             public_key = RSA.importKey(self._public_key)
-            cipher = PKCS1_OAEP.new(public_key)
+            cipher = PKCS1_OAEP.new(public_key, hashAlgo=SHA256.new())
             cipher_key = cipher.encrypt(self._aes_key)
             return cipher_key
         except Exception as e:
