@@ -57,7 +57,7 @@ string RSAkeys::decrypt(const char* cipher, unsigned int length) {
 	string decrypted = "";
 	try {
 		string decrypted;
-		RSAES_OAEP_SHA_Decryptor d(privateKey);
+		RSAES<OAEP<SHA256>>::Decryptor d(privateKey);
 		StringSource ss_cipher(reinterpret_cast<const byte*>(cipher), length, true, new PK_DecryptorFilter(rng, d, new StringSink(decrypted)));
 		return decrypted;
 	}
