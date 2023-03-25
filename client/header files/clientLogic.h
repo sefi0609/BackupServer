@@ -11,8 +11,6 @@
 #define NAME_LEN 255
 #define CHECKSUM_LEN 4
 #define EXIT_FAILURE -1
-// the first chunck of data from the file
-#define FIRST_CHUNCK 736
 
 using boost::asio::ip::tcp;
 using namespace std;
