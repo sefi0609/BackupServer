@@ -1,4 +1,0 @@
-1. run the createDB.py file to create a database with sqlite as described in maman15,
-need to do this step only one time !!!
-OR you can use the server.db file I supply, it has two empty tables - clients and files.
-2. run the server_logic.py for the server to start runing, it will run until you shut it down
