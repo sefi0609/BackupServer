@@ -9,9 +9,9 @@ The server generates a symmetric key, encrypt it with the RSA public key from th
 and sends the encrypted key to the client.  
 The client decrypt the encrypted key. at this point both the client and the server have the same symmetric key.  
 Now the client encrypt the file content and send it to the server.  
-I have sent the file by chunks, encrypted, so the memory of the client and the server will not overload.  
-The server decrypt the file content and write the file to a specific directory for the client.  
-If it is the first file that belongs to the client the server will create a new directory for the clients files.  
+The server decrypt the file content and write the file to a specific directory of the client.  
+If the client doesn't have a directory, the server will create a new directory for the clients files.  
+The file is sent chunk by chunk, encrypted, so the memory of the client and the server will not overload.  
 To verify that the file received by the server properly, the server will calculate checkSum value as per Linux  
 and will send it to the client to verify it.  
 The client will also calculate the checkSum and compare the two values.  
