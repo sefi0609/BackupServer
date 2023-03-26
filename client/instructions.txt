@@ -1,0 +1,2 @@
+In the transfer.info file, in the third line i have included two file,
+one to illustrate the registration function and the second is to illustrate the reconnection function
