@@ -36,8 +36,7 @@ class CryptoHandler:
             cipher = AES.new(self._aes_key, AES.MODE_CBC, iv)
 
             if last_packet:
-                plaintext = cipher.decrypt(ciphertext)
-                plaintext = unpad(plaintext, AES.block_size)
+                plaintext = unpad(cipher.decrypt(ciphertext), AES.block_size)
             else:
                 plaintext = cipher.decrypt(ciphertext)
 
