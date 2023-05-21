@@ -4,6 +4,7 @@
 #include "cryptoHandler.h"
 #include "checkSum.h"
 #include <sstream>
+#include <stdarg.h>
 
 #define VERSION 3
 #define CLIENT_ID_LEN 16
@@ -75,6 +76,8 @@ private:
     void requestRSA(tcp::socket& sock, string name, uint8_t* clientId);
     bool organizeResponseCRC(Response& response, string cid, string fname);
     void requestReconnect(tcp::socket& sock, string name, string clientId);
+    void delete_CRC(uint8_t* clientId, uint8_t* fileName, uint8_t* cksumServer);
+    void close_response(Response* response, ifstream& meFile, tcp::socket& sock);
     void requestCRCok(tcp::socket& sock, string cliendId, string fileName, bool CRC_OK);
     void requestSendFile(tcp::socket& sock, string filePath, string clientId, string key);
     void connectToHost(tcp::socket& sock, tcp::resolver& resolver, string host, string port);
