@@ -21,10 +21,11 @@ void ClientLogic::startClient() {
 	tcp::resolver resolver(io_context);
 	
 	ifstream meFile("me.info", ifstream::binary);
+	connectToHost(sock, resolver, host, port);
+
 	// if file exist try reconnecting to host 
 	if (fileHandler.readFromInfo(meFile, me)) {
 		// send reconnect request
-		connectToHost(sock, resolver, host, port);
 		requestReconnect(sock, me[0], me[1]);
 		Response* response = receiveResponse(sock);
 
@@ -34,9 +35,7 @@ void ClientLogic::startClient() {
 			// load the private RSA key from file
 			if (!RSA.loadFromFile()) {
 				cout << "Can't load private RSA key from file" << endl;
-				delete response;
-				meFile.close();
-				sock.close();
+				close_response(response, meFile, sock);
 				return;
 			}
 
@@ -57,14 +56,11 @@ void ClientLogic::startClient() {
 			cout << "Server didn't send AES key" << endl;
 			cout << "Or the length of the AES key is not 16 bytes" << endl;
 		}
-		delete response;
-		meFile.close();
-		sock.close();
+		close_response(response, meFile, sock);
 	}
 	// registration and sending public RSA key
 	else {
 		// send registration request 
-		connectToHost(sock, resolver, host, port);
 		requestRegistration(sock, transfer[1]);
 		Response* response = receiveResponse(sock);
 
@@ -80,9 +76,7 @@ void ClientLogic::startClient() {
 			else {
 				cout << "can't receive from server, socket error" << endl;
 			}
-			delete response;
-			meFile.close();
-			sock.close();
+			close_response(response, meFile, sock);
 			return;
 		}
 
@@ -102,18 +96,14 @@ void ClientLogic::startClient() {
 			string AESkey = organizeResponseAES(response->payload, clientId);
 			if (AESkey == "") {
 				cout << "Can't extract AES key from payload" << endl;
-				delete response;
-				meFile.close();
-				sock.close();
+				close_response(response, meFile, sock);
 				return;
 			}
 
 			// write to me.info and priv.key
 			if (!fileHandler.wirteToMeFile(transfer[1], clientId, AESkey) || !RSA.writeToFile()) {
 				cout << "Can't save to file" << endl;
-				delete response;
-				meFile.close();
-				sock.close();
+				close_response(response, meFile, sock);
 				return;
 			}
 
@@ -134,11 +124,26 @@ void ClientLogic::startClient() {
 			cout << "Server didn't send AES key" << endl;
 			cout << "Or the length of the AES key is not 16 bytes" << endl;
 		}
-		delete response;
+		close_response(response, meFile, sock);
 	}
-	meFile.close();
-	sock.close();
 } 
+
+// close all startClient() resources
+// if failed print error message and exit 
+void ClientLogic::close_response(Response* response, ifstream &meFile, tcp::socket &sock) {
+	try {
+		response->code = 0;
+		response->payloadSize = 0;
+		response->payload = nullptr;
+		meFile.close();
+		sock.close();
+	}
+	catch (const exception& e) {
+		cout << "Error: can't close response resources - " << endl;
+		cout << e.what() << endl;;
+		exit(EXIT_FAILURE);
+	}
+}
 
 // unpack the CRC response payload,
 // handle CRC response - calculte checksum,
@@ -164,9 +169,7 @@ bool ClientLogic::organizeResponseCRC(Response& response, string cid, string fna
 		// calculating CRC
 		int cksum = calculateCheckSum(fname);
 		if (!cksum) {
-			delete[] clientId;
-			delete[] fileName;
-			delete[] cksumServer;
+			delete_CRC(clientId, fileName, cksumServer);
 			return false;
 		}
 
@@ -181,9 +184,7 @@ bool ClientLogic::organizeResponseCRC(Response& response, string cid, string fna
 		if (memcmp(clientId, cid.c_str(), CLIENT_ID_LEN) || memcmp(cksumBytes.byte, cksumServer, CHECKSUM_LEN)
 														 || memcmp(fileName, fname.c_str(), fname.length())) {
 			cout << "The client id, file name or checksum dosen't match" << endl;
-			delete[] clientId;
-			delete[] fileName;
-			delete[] cksumServer;
+			delete_CRC(clientId, fileName, cksumServer);
 			return false;
 		}
 		return true;
@@ -192,6 +193,21 @@ bool ClientLogic::organizeResponseCRC(Response& response, string cid, string fna
 		cout << "The response code dosen't match the CRC ok request" << endl;
 		cout << "Response code from server: " << response.code << endl;
 		return false;
+	}
+}
+
+// close all organizeResponseCRC() resources
+// if failed print error message and exit 
+void ClientLogic::delete_CRC(uint8_t* clientId, uint8_t* fileName, uint8_t* cksumServer) {
+	try {
+		delete[] clientId;
+		delete[] fileName;
+		delete[] cksumServer;
+	}
+	catch (const exception& e) {
+		cout << "Error: can't delete CRC resources - " << endl;
+		cout << e.what() << endl;;
+		exit(EXIT_FAILURE);
 	}
 }
 
