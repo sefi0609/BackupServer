@@ -1,9 +1,11 @@
 import sqlite3
 
 
-# DataBase class - handles the database
-# create, save rows to tables, and update needed fields
 class DataBase:
+    """
+    DataBase class - handles the database
+    create, save rows to tables, and update needed fields
+    """
     def __init__(self):
         self.name = 'server.db'
         self.clients_columns = 5
@@ -11,9 +13,11 @@ class DataBase:
         self.update_aes = 3
         self.update_last = 2
 
-    # create a database as described in maman15
-    # need to use only one time to create the database
     def create_database(self):
+        """
+        create a database as described in maman15
+        need to use only one time to create the database
+        """
         conn = sqlite3.connect(self.name)
         conn.text_factory = bytes
 
@@ -37,8 +41,8 @@ class DataBase:
         conn.commit()
         conn.close()
 
-    # get clients and files tables from database
     def get_tables(self):
+        """ get clients and files tables from database """
         try:
             with sqlite3.connect(self.name) as conn:
                 cur = conn.cursor()
@@ -50,8 +54,8 @@ class DataBase:
         except Exception as e:
             print(f'Exception at get_tables(): {e}')
 
-    # get just the files table from database
     def get_files_table(self):
+        """ get just the files table from database """
         try:
             with sqlite3.connect(self.name) as conn:
                 cur = conn.cursor()
@@ -61,8 +65,8 @@ class DataBase:
         except Exception as e:
             print(f'Exception at get_files_table(): {e}')
 
-    # get just the clients table from database
     def get_clients_table(self):
+        """ get just the clients table from database """
         try:
             with sqlite3.connect(self.name) as conn:
                 cur = conn.cursor()
@@ -72,8 +76,8 @@ class DataBase:
         except Exception as e:
             print(f'Exception at get_clients_table(): {e}')
 
-    # save a new row to clients table
     def save_to_clients(self, *argv):
+        """ save a new row to clients table """
         if len(argv) != self.clients_columns:
             raise Exception('Need 5 fields for clients table')
         try:
@@ -86,8 +90,8 @@ class DataBase:
             print(f'Exception at save_to_clients(): {e}')
             raise e
 
-    # save a new row to files table
     def save_to_files(self, client_id, file_name, file_path, verified, last_seen):
+        """ save a new row to files table """
         try:
             with sqlite3.connect(self.name) as conn:
                 cur = conn.cursor()
@@ -100,8 +104,8 @@ class DataBase:
             print(f'Exception at save_to_files(): {e}')
             raise e
 
-    # update aes key and last seen in clients table
     def update_aes_key(self, *argv):
+        """ update aes key and last seen in clients table """
         if len(argv) != self.update_aes:
             raise Exception('Need 3 fields to update aes key on clients table')
         try:
@@ -113,8 +117,8 @@ class DataBase:
         except Exception as e:
             print(f'Exception at update_aes_key(): {e}')
 
-    # update verified field in files table
     def update_files(self, verified, client_id, file_name, last_seen):
+        """ update verified field in files table """
         try:
             with sqlite3.connect(self.name) as conn:
                 cur = conn.cursor()
@@ -127,9 +131,9 @@ class DataBase:
         except Exception as e:
             print(f'Exception at update_files(): {e}')
             raise e
-
-    # update last seen at clients table
+            
     def update_last_seen(self, *argv):
+        """ update last seen at clients table """
         if len(argv) != self.update_last:
             raise Exception('Need 2 fields to update aes key on clients table')
         try:
