@@ -8,9 +8,11 @@ from file_handler import write_file, read_info
 from database_handler import DataBase
 from crypto_handler import CryptoHandler
 from socket_handler import SocketHandler, PACKET_SIZE
-# all the magic numbers in this script designed to confuse the enemy
-# you can easily understand those numbers from the protocol in maman15
-# most of them are indexes
+"""
+All the magic numbers in this script designed to confuse the enemy,
+you can easily understand those numbers from the protocol in maman15,
+most of them are indexes
+"""
 
 # global variables and structs
 RESPONSE_HEADER_LEN = 7
@@ -41,24 +43,24 @@ request_code = {'REGISTRATION': 1100, 'SEND_RSA_KEY': 1101, 'CONNECT_AGAIN': 110
                 'SEND_FILE': 1103, 'CRC_OK': 1104, 'CRC_NOT_OK': 1105, 'CRC_FAILED': 1106}
 
 
-# class representation of response per maman15
 class Response:
+    """ Class representation of response packet """
     def __init__(self):
         self.version = VERSION
         self.code = 0
         self.payload_size = 0
         self.payload = b''
 
-    # pack the first packet
     def pack(self):
+        """ Pack the first packet """
         leftover = PACKET_SIZE - RESPONSE_HEADER_LEN
         if self.payload_size < leftover:
             leftover = self.payload_size
         return struct.pack(f'<BHI{leftover}s', self.version, self.code, self.payload_size, self.payload[:leftover])
 
 
-# class representation of request per maman15
 class Request:
+    """ Class representation of request packet """
     def __init__(self, data):
         self.client_id = 0
         self.version = 0
@@ -79,16 +81,18 @@ class Request:
             print(f'Error unpacking the request form the client: {e}')
 
 
-# send a generic error response
 def generic_error(sock):
+    """ Send a generic error response"""
     response = Response()
     response.code = response_code['GENERIC_ERROR']
     sock.send_to_client(response.pack())
 
 
-# This is the Linux way to calculate check sum - using hash function (md5)
-# then calculate chunks sum to fit in 4 bytes
 def file_checksum(filename, read_chunk_size=65536, algorithm='md5'):
+    """
+    This is the Linux way to calculate check sum - using hash function (md5),
+    then calculate chunks sum to fit in 4 bytes
+    """
     checksum = hashlib.new(algorithm)  # Raises appropriate exceptions.
     with open(filename, 'rb') as f:
         for chunk in iter(lambda: f.read(read_chunk_size), b''):
@@ -106,11 +110,13 @@ def file_checksum(filename, read_chunk_size=65536, algorithm='md5'):
     return hex_sum
 
 
-# receive all the packets for all request except SEND_FILE request
-# produce the time of the request to save to the database
-# call check_code() to continue to the proper function (by request)
-# after handling the request close the client socket
 def get_all_packets(sock):
+    """
+    Receive all the packets for all request except SEND_FILE request
+    Produce the time of the request to save to the database
+    Call check_code() to continue to the proper function (by request)
+    After handling the request close the client socket
+    """
     data = []
     request = Request(sock.receive_from_client())
 
@@ -154,9 +160,11 @@ def get_all_packets(sock):
     sock.close_socket()
 
 
-# send all packets to client using Response object,
-# make sure all the payload sent to the client
 def send_all_packets(sock, response):
+    """
+    Send all packets to client using Response object,
+    make sure all the payload sent to the client
+    """
     sock.send_to_client(response.pack())
     payload_sent = PACKET_SIZE - RESPONSE_HEADER_LEN
     remain = response.payload_size - payload_sent
@@ -174,9 +182,11 @@ def send_all_packets(sock, response):
             remain = 0
 
 
-# check the request code and call the proper function
-# update database and memory
 def check_code(request, sock, last_seen):
+    """
+    Check the request code and call the proper function
+    Update database and memory
+    """
     global database, clients_table
 
     if request.code == request_code['REGISTRATION']:
@@ -198,10 +208,12 @@ def check_code(request, sock, last_seen):
         print('Not a valid request code')
 
 
-# handle CRC request,
-# crc_ok true - CRC is ok, else CRC is not ok
-# update database and memory
 def crc_request(request, sock, last_seen, crc_ok):
+    """
+    Handle CRC request,
+    crc_ok true - CRC is ok, else CRC is not ok
+    update database and memory
+    """
     global clients_table, files_table, database
 
     # check that the client is registered
@@ -259,13 +271,15 @@ def crc_request(request, sock, last_seen, crc_ok):
         return
 
 
-# handle send file request,
-# get the AES key from memory,
-# decrypt the file sent by the client as cipher,
-# write the file to the correct path - files/client_name/file_name,
-# calculate checksum and create a response for client,
-# update database and memory
 def send_file_request(request, sock, last_seen):
+    """
+    Handle send file request,
+    get the AES key from memory,
+    decrypt the file sent by the client as cipher,
+    write the file to the correct path - files/client_name/file_name,
+    calculate checksum and create a response for client,
+    update database and memory
+    """
     global clients_table, files_table, database
 
     # check if the client is registered
@@ -338,11 +352,13 @@ def send_file_request(request, sock, last_seen):
         return
 
 
-# handle reconnect request from client,
-# get the public key of the client - if registered,
-# generate new AES key, encrypt it and send to client
-# update new AES key in memory and database
 def reconnect_request(request, sock, last_seen):
+    """
+    Handle reconnect request from client,
+    get the public key of the client - if registered,
+    generate new AES key, encrypt it and send to client
+    update new AES key in memory and database
+    """
     global clients_table, database
 
     public_key = None
@@ -392,12 +408,14 @@ def reconnect_request(request, sock, last_seen):
         print("Internal error: Can't decrypt the AES key")
 
 
-# handle RSA request from client,
-# receive the client's public key, generate an AES key,
-# encrypt the AES key with the client public key,
-# send the cipher key to the client,
-# update the new AES key to the database
 def rsa_request(request, sock, last_seen):
+    """
+    Handle RSA request from client,
+    receive the client's public key, generate an AES key,
+    encrypt the AES key with the client public key,
+    send the cipher key to the client,
+    update the new AES key to the database
+    """
     global clients_table, database
 
     # get the client name from the payload
@@ -447,11 +465,13 @@ def rsa_request(request, sock, last_seen):
         print("Internal error: Can't decrypt the AES key")
 
 
-# handle registration request from client,
-# if the client name already exist send to client REGISTRATION_FAILED,
-# else send to client REGISTRATION_SUCCESS and update the memory,
-# no need to update database without the keys - wait for the next request RSA
 def registration_request(request, sock, last_seen):
+    """
+    Handle registration request from client,
+    if the client name already exist send to client REGISTRATION_FAILED,
+    else send to client REGISTRATION_SUCCESS and update the memory,
+    no need to update database without the keys - wait for the next request RSA
+    """
     global clients_table
     request.payload = request.payload
 
@@ -489,8 +509,8 @@ def registration_request(request, sock, last_seen):
         send_all_packets(sock, response)
 
 
-# entry point
 def main():
+    """ Main function - entry point """
     # start the server with the port and the two tables
     port = read_info()
     while True:
